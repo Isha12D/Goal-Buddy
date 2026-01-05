@@ -65,6 +65,7 @@ const Login = ({ toggleLoginForm, toggleSignupForm }) => {
           _id: result.data.user._id,   // Get user ID from the response
           name: result.data.user.name, // Get user's name from the response
           email: result.data.user.email, // Get email from the response
+          profilePic: result.data.user.profilePic,
           accessToken: result.data.accessToken,
           refreshToken: result.data.refreshToken,
         };
@@ -75,8 +76,8 @@ const Login = ({ toggleLoginForm, toggleSignupForm }) => {
         //console.log(user._id); // Log only the user ID
   
         // Save tokens to localStorage (optional, for persistence)
-        // localStorage.setItem('accessToken', result.data.accessToken);
-        // localStorage.setItem('refreshToken', result.data.refreshToken);
+         localStorage.setItem('accessToken', result.data.accessToken);
+         localStorage.setItem('refreshToken', result.data.refreshToken);
         
         // Redirect to the display page
         navigate('/main');
@@ -95,14 +96,14 @@ const Login = ({ toggleLoginForm, toggleSignupForm }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-gradient-to-r from-yellow-200 to-yellow-300 rounded-lg p-8 w-96 relative shadow-lg">
+      <div className="bg-gradient-to-r from-orange-400 to-yellow-300 rounded-lg p-8 w-96 relative shadow-lg">
         <button
           onClick={toggleLoginForm}
           className="absolute top-6 right-6 text-gray-600 hover:text-gray-900 bg-slate-400 opacity-30 rounded-full w-8 h-8 z-10 font-bold"
         >
           &times;
         </button>
-        <h2 className="text-2xl font-bold mb-4 text-center">Welcome Back!</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center text-zinc-900">Welcome Back!</h2>
         {/* Form */}
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>

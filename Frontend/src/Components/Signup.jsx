@@ -13,7 +13,7 @@ const Signup = ({toggleSignupForm}) => {
   const {signup} = useAuth();
 
   const validateEmail = (email) => {
-    return /\S+@\S+\.\S+/.test(email);
+    return /\S+@\S+\.\S+/.test(email);   //regex expression-> /\S+@\S+\.\S+/
   };
 
   const handleSubmit = (e) => {
@@ -28,7 +28,7 @@ const Signup = ({toggleSignupForm}) => {
       axios.post('http://localhost:3006/signup',{name, email, password})
       .then(result => {console.log(result);
         signup(result.data);
-        navigate('/display')
+        navigate('/main')
       })
       .catch(err => setErrorMessage('Signup failed. Try again.'))
   }
@@ -36,14 +36,14 @@ const Signup = ({toggleSignupForm}) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-gradient-to-r from-yellow-200 to-yellow-400 rounded-lg p-8 w-96 relative shadow-lg">
+      <div className="bg-gradient-to-r from-orange-400 to-yellow-300 rounded-lg p-8 w-96 relative shadow-lg">
         <button
           onClick={toggleSignupForm}
           className="absolute top-6 right-6 text-gray-600 hover:text-gray-900 bg-slate-400 opacity-30 rounded-full w-8 h-8 z-10 font-bold"
         >
           &times;
         </button>
-        <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center text-black">Sign Up</h2>
         <form className="space-y-4 " onSubmit={handleSubmit}>
           <div>
             <label className="block text-gray-700">Name</label>
@@ -82,6 +82,7 @@ const Signup = ({toggleSignupForm}) => {
             Sign Up
           </button>
         </form>
+        
       </div>
     </div>
   )

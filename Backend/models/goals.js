@@ -25,11 +25,11 @@ const GoalSchema = new mongoose.Schema({
         required: true,
     },
     startDate: {
-        type: String,
+        type: Date,
         required: true,
     },
     endDate: {
-        type: String,
+        type: Date,
         required: true,
     },
     image:{
@@ -50,14 +50,15 @@ const GoalSchema = new mongoose.Schema({
         default: null, 
     },
     sentTimestamp:{
-        type: String,
+        type: Date,
         //required: true,
     },
     completionTimestamp: {
-        type: String,  // Store the timestamp of completion
+        type: Date,  // Store the timestamp of completion
         default: null,
     }
-},);
+},
+);
 
 const Goal = mongoose.model('Goal', GoalSchema);
 module.exports = Goal;

@@ -1,18 +1,72 @@
-import React,{useState} from "react";
+import React,{useEffect, useState} from "react";
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 import { CalendarToday } from "@mui/icons-material"; 
 import Navbar from "../Components/Navbar.jsx";
 import Goals from "../Components/Goals.jsx";
+import Footer from "../Components/Footer.jsx";
 import {Link} from 'react-router-dom';
+import axios from 'axios';
+//import { useAuth } from "../Context/AuthContext.jsx";
 
 
 const Main = () => {
 
   const [selectedUser, setSelectedUser] = useState(null);
+  const [message, setMessage] = useState('');
+  const [user, setUser] = useState(null);
   const {currentUser} = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProtectedData = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const res = await axios.get('http://localhost:3006/main', {
+          headers:{
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        setMessage(res.data.message);
+        setUser(res.data.user);
+      } catch (err) {
+        if(err.response && err.response.status === 401){
+          console.log('Access token expired. Trying refresh....');
+          refreshAccessToken();
+        }else{
+          console.error('Failed to fetch protected data: ', err);
+        }
+      }
+    }
+  });
+
+  const refreshAccessToken = async() => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if(!refreshToken) return;
+
+    try {
+      const res = await axios.post('http://localhost:3006/token', {
+        token: refreshToken,
+      });
+
+      const newAccessToken = res.data.accessToken;
+      localStorage.setItem('accessToken', newAccessToken);
+
+      const retryRes = await axios.get('http://localhost:3006/main', {
+      headers: {
+        Authorization: `Bearer ${newAccessToken}`,
+      },
+    });
+
+    setMessage(retryRes.data.message);
+    setUser(retryRes.data.user);
+    } catch (err) {
+      console.error('Token refresh failed: ', err);
+      logout();
+      navigate('/');
+    }
+  }
 
   const handleFriendsClick = () =>{
     setSelectedUser(currentUser);
@@ -85,32 +139,38 @@ const Main = () => {
         Welcome {currentUser?.name || 'User'}, set your goals for today!!
       </div>
 
+      
       {/* Second Strip */}
-      <div className="w-full h-40 flex justify-around items-center  ">
-        <div className="bg-red-500 rounded-badge w-1/4  p-4  flex items-center justify-center hover:scale-110 transition-transform duration-300">
-        <Link to="/your-profile" className="flex items-center">
-          <img
-            src="https://i.pinimg.com/736x/39/42/01/39420149269ede36847932935b26f0b8.jpg"
-            alt="Profile"
-            className="rounded-full w-20 h-20"
-          />
-          <p className="ml-2 text-center text-xl">Your Profile</p>
-          </Link>
-        </div>
-        <div className="bg-orange-500 rounded-badge w-1/4 p-4 flex items-center justify-center hover:scale-110 transition-transform duration-300">
-          <img
-            src="https://i.pinimg.com/736x/22/47/df/2247dfeadf240a989623cfa1a8355a34.jpg"
-            alt="Friends"
-            className="rounded-full w-20 h-20"
-          />
-          <p className="ml-2 text-center text-xl" onClick={handleFriendsClick}>Connect with Friends</p>
-        </div>
-      </div>
+<div className="w-full flex flex-col md:flex-row justify-around items-center gap-4 md:gap-0 px-4 py-6">
+  {/* Profile Box */}
+  <div className="bg-red-500 rounded-badge w-full md:w-1/4 p-4 flex flex-col items-center justify-center hover:scale-110 transition-transform duration-300">
+    <Link to="/your-profile" className="flex flex-col items-center text-white">
+      <img
+        src="https://i.pinimg.com/736x/39/42/01/39420149269ede36847932935b26f0b8.jpg"
+        alt="Profile"
+        className="rounded-full w-20 h-20"
+      />
+      <p className="mt-2 text-center text-xl">Your Profile</p>
+    </Link>
+  </div>
+
+  {/* Friends Box */}
+  <div className="bg-orange-500 rounded-badge w-full md:w-1/4 p-4 flex flex-col items-center justify-center hover:scale-110 transition-transform duration-300 text-white cursor-pointer" onClick={handleFriendsClick}>
+    <img
+      src="https://i.pinimg.com/736x/22/47/df/2247dfeadf240a989623cfa1a8355a34.jpg"
+      alt="Friends"
+      className="rounded-full w-20 h-20"
+    />
+    <p className="mt-2 text-center text-xl" >Connect with Friends</p>
+  </div>
+</div>
+
 
       {/* Third Section */}
       <Goals socket={''} currentUser={currentUser} selectedUser={''} goalType={"personal"}/>
-      
+      <Footer/>
     </div>
+    
   );
 };
 

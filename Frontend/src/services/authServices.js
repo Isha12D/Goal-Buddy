@@ -28,7 +28,7 @@
 
 export async function refreshAccessToken() {
     const refreshToken = localStorage.getItem('refreshToken');
-    //console.log("Retrieved refreshToken:", refreshToken);  // Log the token value for debugging
+    console.log("Retrieved refreshToken:", refreshToken);  // Log the token value for debugging
 
     if (!refreshToken) {
         console.error('No refresh token found in localStorage');

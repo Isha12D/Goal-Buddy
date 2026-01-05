@@ -95,6 +95,19 @@ const Home = () => {
         </div>
       </div>
 
+      {/* CTA Section */}
+      <div className="bg-[#2a0a31] text-white py-12 text-center">
+        <h2 className="text-3xl md:text-4xl ">
+          Ready to achieve your goals? Let's get started!
+        </h2>
+        <p className="text-lg md:text-xl mt-2 opacity-80">
+          Connect, compete, and celebrate every milestone.
+        </p>
+        <button className="mt-6 px-6 py-3 bg-orange-500 text-black font-semibold rounded-full hover:bg-orange-600 transition">
+          Get Started
+        </button>
+      </div>
+
       
       <Footer/>
 

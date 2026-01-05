@@ -7,6 +7,7 @@ import Profile from "./Pages/Profile.jsx";
 import { refreshAccessToken } from "./services/authServices";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import YourGoals from "./Components/YourGoals.jsx";
+import EditProfile from "./Pages/EditProfile.jsx";
 
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
         <Route path="/main" element={<Main />} />
         <Route path="your-profile" element={<Profile/>}/>
         <Route path="your-goals" element={<YourGoals/>}/>
+        <Route path="edit-profile" element={<EditProfile/>}/>
       </Routes>
     </Router>
   )

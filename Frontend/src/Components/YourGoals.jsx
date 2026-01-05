@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../Context/AuthContext";
 import Navbar from "./Navbar.jsx";
+import Footer from "./Footer.jsx";
 
 const YourGoals = () => {
   const { currentUser } = useAuth();
@@ -29,13 +30,14 @@ const YourGoals = () => {
           endDate.setHours(hours, minutes, 0);
         }
   
-        console.log(`Goal: ${goal.goal} | EndTime: ${endDate} | CurrentTime: ${today}`);
+        //console.log(`Goal: ${goal.goal} | EndTime: ${endDate} | CurrentTime: ${today}`);
   
         if (!isNaN(endDate.getTime()) && endDate < today && goal.status !== "completed") {
           return { ...goal, status: "incomplete" };
         }
         return goal;
       });
+      updatedGoals.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
   
       setGoals(updatedGoals);
     } catch (error) {
@@ -46,18 +48,27 @@ const YourGoals = () => {
 
   const markAsComplete = async (goalId) => {
     try {
-      await axios.put(`http://localhost:3006/mark-goal-complete/${goalId}`, {}, {
-        headers: { "Content-Type": "application/json" },
-      });
-
+      const completionTime = new Date().toISOString(); // Get the current timestamp
+  
+      const response = await axios.put(
+        `http://localhost:3006/mark-goal-complete/${goalId}`, 
+        { completionTimestamp: completionTime }, // Send timestamp
+        { headers: { "Content-Type": "application/json" } }
+      );
+  
+      const updatedGoal = response.data;
+  
       setGoals(goals.map((goal) => 
-        goal._id === goalId ? { ...goal, status: "completed" } : goal
+        goal._id === goalId 
+          ? { ...goal, status: "completed", completionTimestamp: updatedGoal.completionTimestamp }
+          : goal
       ));
       
     } catch (error) {
       console.error("Error marking goal as complete:", error);
     }
   };
+  
 
   return (
     <div>
@@ -101,6 +112,9 @@ const YourGoals = () => {
 
           </div>
         ))}
+      </div>
+      <div className="mt-10">
+        <Footer/>
       </div>
     </div>
   );

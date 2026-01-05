@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+.color-empty {
+  fill: #e0e0e0;
+}
+.color-scale-1 {
+  fill: #a3e635;
+}
+.color-scale-3 {
+  fill: #65a30d;
+}
+.color-scale-5 {
+  fill: #15803d;
+}
+
 
 
 /* :root {

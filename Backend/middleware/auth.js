@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+//What Is JWT?
+//A JWT (JSON Web Token) is a string token given to a user after they log in. It acts like a badge. When the user sends a request to a protected route, the token proves they’re authenticated.
 
 const generateAccessToken = (user) => {
     return jwt.sign(user, process.env.JWT_SECRET, {expiresIn: '15m'});
@@ -12,14 +14,14 @@ const generateRefreshToken = (user) => {
 const authenticateUser = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
-    if(!authHeader || !authHeader.startsWith('Bearer')){
+    if(!authHeader || !authHeader.startsWith('Bearer ')){
         return res.status(401).json({ message: 'Access Denied' });
     }
 
     const token = authHeader.split(' ')[1];
 
     try {
-        const verified = jwt.verify('token', process.env.JWT_SECRET); // Verify the token
+        const verified = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
         req.user = verified; // Attach user info to the request object
         next(); // Proceed to the next middleware or route handler
     } catch (err) {

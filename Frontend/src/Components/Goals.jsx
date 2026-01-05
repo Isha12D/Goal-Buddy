@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+;import React, { useState } from "react"; 
 import { useGoal } from "../Context/GoalContext";
 import { Card, CardContent, Typography, Grid, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, InputAdornment } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
@@ -40,12 +40,32 @@ const Goals = ({socket, currentUser, selectedUser, goalType}) => {
   const { setGoalData, setTimestamp } = useGoal();
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().split("T")[0]; //new Date()
+
+// Creates a new Date object with the current date and time.
+
+// .toISOString()
+
+// Converts the date to a standard ISO 8601 string:
+// "2025-07-24T14:32:00.000Z"
+
+// .split("T")
+
+// Splits the ISO string at the "T" character:
+
+// js
+// Copy
+// Edit
+// ["2025-07-24", "14:32:00.000Z"]
+// [0]
+
+// Gets the first part: "2025-07-24"
   const [goalData, setLocalGoalData] = useState({
     description: "",
     startDate: today,
     endDate: today,
-    scheduleTime: "",
+    scheduleTime: today,
+    sentTimestamp: new Date(),
   });
 
   const handleGoalClick = (goal) => {
@@ -68,12 +88,11 @@ const Goals = ({socket, currentUser, selectedUser, goalType}) => {
 
   
 
-  //const scheduledTimeISO = new Date(`${today}T${goalData.scheduleTime}:00Z`).toISOString();
+  //const scheduledTimeISO = new Date(${today}T${goalData.scheduleTime}:00Z).toISOString();
 
   const handleSubmit = () => {
     //console.log("Goal set:", goalData);
     setGoalData(goalData);
-    setTimestamp(new Date().toISOString());
     const goalMessage = {
       user: currentUser.name,
       receiverSocketId: selectedUser.name,
@@ -85,13 +104,14 @@ const Goals = ({socket, currentUser, selectedUser, goalType}) => {
         description: goalData.description,
         scheduleTime: goalData.scheduleTime,
         goalType: goalType,
+        timestamp: new Date(),
       },
-      timestamp: new Date().toISOString(),
+      
     };
 
-    // console.log(currentUser._id);
-    // console.log(selectedUser._id);
-    //console.log('receiverSocketId:', receiverSocketId);
+    console.log(currentUser._id);
+    console.log(selectedUser._id);
+    //  console.log('receiverSocketId:', receiverSocketId);
     if(goalType === 'friends'){
       socket.emit('goalMessage', goalMessage);
     }

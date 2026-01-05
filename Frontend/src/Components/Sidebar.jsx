@@ -60,12 +60,12 @@ const Sidebar = ({setSelectedUser}) => {
   };
 
   return (
-    <div className="w-1/3 h-screen flex flex-col shadow-lg relative bg-gray-950 border-gray-900 border-2">
+    <div className="w-full h-screen flex flex-col shadow-lg relative bg-gray-950 border-gray-900 border-2">
       {/* User Info Section */}
       <div className="flex items-center justify-between bg-orange-500 p-4 shadow-md rounded-btn mb-4">
         <div className="w-12 h-12 flex items-center justify-center rounded-full border-2 border-white overflow-hidden">
           <img 
-            src="https://i.pinimg.com/736x/36/6b/57/366b57f4847a2dc8ef9794ebba1dde1a.jpg" 
+            src={currentUser?.profilePic}
             alt="Profile" 
             className="w-full h-full object-cover"
           />
@@ -123,7 +123,7 @@ const Sidebar = ({setSelectedUser}) => {
               >
                 <div className="flex items-center space-x-3">
                   <img 
-                    src={user.avatar || 'https://i.pinimg.com/736x/9a/56/bf/9a56bf771d2252298b02afb5fca68511.jpg'} 
+                    src={user?.profilePic || 'https://i.pinimg.com/736x/9a/56/bf/9a56bf771d2252298b02afb5fca68511.jpg'} 
                     alt="avatar" 
                     className="w-12 h-12 rounded-full object-cover"
                   />

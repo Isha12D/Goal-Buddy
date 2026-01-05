@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "../Components/Navbar";
 import YourProfile from "../Components/YourProfile";
+import FriendProfile from "../Components/FriendProfile";
+import Footer from "../Components/Footer";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("personal");
@@ -58,10 +60,14 @@ const Profile = () => {
         {activeTab === "personal" ? (
           <div className="text-center text-xl"><YourProfile/></div>
         ) : (
-          <div className="text-center text-xl">Friends Analytics (Coming Soon)</div>
+          <div className="text-center text-xl"><FriendProfile/></div>
         )}
       </motion.div>
+      <div className="mt-10">
+        <Footer />
+      </div>
     </div>
+    
   );
 };
 
