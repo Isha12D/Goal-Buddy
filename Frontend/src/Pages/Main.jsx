@@ -10,20 +10,21 @@ import {Link} from 'react-router-dom';
 import axios from 'axios';
 //import { useAuth } from "../Context/AuthContext.jsx";
 
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Main = () => {
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [message, setMessage] = useState('');
   const [user, setUser] = useState(null);
-  const {currentUser} = useAuth();
+  const {currentUser, logout} = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProtectedData = async () => {
       try {
         const accessToken = localStorage.getItem('accessToken');
-        const res = await axios.get('http://localhost:3006/main', {
+        const res = await axios.get(`${API_URL}/main`, {
           headers:{
             Authorization: `Bearer ${accessToken}`,
           },
@@ -39,21 +40,22 @@ const Main = () => {
         }
       }
     }
-  });
+    fetchProtectedData();
+  }, []);
 
   const refreshAccessToken = async() => {
     const refreshToken = localStorage.getItem('refreshToken');
     if(!refreshToken) return;
 
     try {
-      const res = await axios.post('http://localhost:3006/token', {
+      const res = await axios.post(`${API_URL}/token`, {
         token: refreshToken,
       });
 
       const newAccessToken = res.data.accessToken;
       localStorage.setItem('accessToken', newAccessToken);
 
-      const retryRes = await axios.get('http://localhost:3006/main', {
+      const retryRes = await axios.get(`${API_URL}/main`, {
       headers: {
         Authorization: `Bearer ${newAccessToken}`,
       },

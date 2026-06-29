@@ -26,30 +26,34 @@
 // }
 
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export async function refreshAccessToken() {
-    const refreshToken = localStorage.getItem('refreshToken');
-    console.log("Retrieved refreshToken:", refreshToken);  // Log the token value for debugging
+    const refreshToken = localStorage.getItem("refreshToken");
+    console.log("Retrieved refreshToken:", refreshToken);
 
     if (!refreshToken) {
-        console.error('No refresh token found in localStorage');
-        return; // Exit if no refresh token
+        console.error("No refresh token found in localStorage");
+        return;
     }
 
     try {
-        const response = await fetch('http://localhost:3006/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+        const response = await fetch(`${API_URL}/token`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
             body: JSON.stringify({ token: refreshToken }),
         });
 
         if (response.ok) {
             const data = await response.json();
-            localStorage.setItem('accessToken', data.accessToken);
-            console.log('Access token refreshed successfully');
+            localStorage.setItem("accessToken", data.accessToken);
+            console.log("Access token refreshed successfully");
         } else {
-            console.error('Failed to refresh access token:', response.statusText);
+            console.error("Failed to refresh access token:", response.statusText);
         }
     } catch (error) {
-        console.error('Error refreshing access token:', error);
+        console.error("Error refreshing access token:", error);
     }
 }

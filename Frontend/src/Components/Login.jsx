@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../Context/AuthContext';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Login = ({ toggleLoginForm, toggleSignupForm }) => {
 
   const [email, setEmail] = useState('')
@@ -57,7 +59,7 @@ const Login = ({ toggleLoginForm, toggleSignupForm }) => {
     }
 
     try {
-      const result = await axios.post('http://localhost:3006/auth/login', { email, password });
+      const result = await axios.post(`${API_URL}/auth/login`, { email, password });
       
       if (result.data.accessToken && result.data.refreshToken) {
         // Directly access user details from the response

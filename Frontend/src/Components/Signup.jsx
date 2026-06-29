@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useAuth } from '../Context/AuthContext'
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Signup = ({toggleSignupForm}) => {
 
   const [name, setName] = useState("");
@@ -43,7 +45,7 @@ const Signup = ({toggleSignupForm}) => {
       return;
     }
 
-    axios.post('http://localhost:3006/auth/signup', {
+    axios.post(`${API_URL}/auth/signup`, {
       name,
       email,
       password

@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../Context/AuthContext';
 import { FaSearch } from 'react-icons/fa';  // Importing magnifying glass icon from react-icons
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Sidebar = ({setSelectedUser}) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,7 +33,7 @@ const Sidebar = ({setSelectedUser}) => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch('http://localhost:3006/user');
+        const res = await fetch(`${API_URL}/user`);
         const data = await res.json();
         const filteredUsers = data.filter(user => user.email !== currentUser.email);
         setUsers(filteredUsers);

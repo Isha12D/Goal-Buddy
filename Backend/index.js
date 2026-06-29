@@ -49,6 +49,6 @@ app.set("io", io);
 socketHandler(io);
 
 // Server
-server.listen(3006, () => {
+server.listen(process.env.PORT || 3006, () => {
   console.log("Server running on 3006 🚀");
 });

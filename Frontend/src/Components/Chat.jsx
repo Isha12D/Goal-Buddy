@@ -17,7 +17,8 @@ import {
   Button,
 } from "@mui/material";
 import { MdVideocam } from "react-icons/md";
-import VideoCall from "./VideoCall";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Chat = ({ selectedUser , onBack}) => {
   const { currentUser } = useAuth();
@@ -29,13 +30,13 @@ const Chat = ({ selectedUser , onBack}) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const socket = useRef(null);
   //video call
-  const [showVideoCall, setShowVideoCall] = useState(false);
+  //const [showVideoCall, setShowVideoCall] = useState(false);
 
   const selectedUserRef = useRef(null);
 
-  const handleVideoCallClick = () => {
-    setShowVideoCall(true);
-  };
+  // const handleVideoCallClick = () => {
+  //   setShowVideoCall(true);
+  // };
 
   const getGoalId = async (scheduleTime ) => {
     try {
@@ -46,7 +47,7 @@ const Chat = ({ selectedUser , onBack}) => {
       console.log("the scheduled time is :", goalData.scheduleTime);
 
       const response = await fetch(
-        `http://localhost:3006/goals/get-goal-id?currentUserId=${currentUser._id}&selectedUserId=${selectedUser._id}&scheduleTime=${scheduleTime}`
+        `${API_URL}/goals/get-goal-id?currentUserId=${currentUser._id}&selectedUserId=${selectedUser._id}&scheduleTime=${scheduleTime}`
       );
       const data = await response.json();
 
@@ -242,7 +243,7 @@ const Chat = ({ selectedUser , onBack}) => {
   useEffect(() => {
     // Establish socket connection once
     if (!socket.current) {
-      socket.current = io("http://localhost:3006");
+      socket.current = io(API_URL);
 
       // Listen for incoming messages
       socket.current.on("message", (message) => {
@@ -369,7 +370,7 @@ const Chat = ({ selectedUser , onBack}) => {
       const fetchChatHistory = async () => {
         try {
           const response = await fetch(
-            `http://localhost:3006/chat/history/${currentUser.email}/${selectedUser.email}?page=1&limit=30`
+            `${API_URL}/chat/history/${currentUser.email}/${selectedUser.email}?page=1&limit=30`
           );
           const data = await response.json();
           const formattedMessages = data.map((msg) => ({
@@ -398,7 +399,7 @@ const Chat = ({ selectedUser , onBack}) => {
       const fetchGoalHistory = async () => {
         try {
           const response = await fetch(
-            `http://localhost:3006/goals/shared/${currentUser.email}/${selectedUser.email}?page=1&limit=30`
+            `${API_URL}/goals/shared/${currentUser.email}/${selectedUser.email}?page=1&limit=30`
           );
           const data = await response.json();
 
@@ -504,7 +505,7 @@ const Chat = ({ selectedUser , onBack}) => {
       console.log("Ima in mark complete with goal id:", goalId);
 
       const response = await axios.put(
-        `http://localhost:3006/goals/${goalId}/mark-complete`,
+        `${API_URL}/goals/${goalId}/mark-complete`,
         {
           winnerId: currentUser._id,
           completionTimestamp: new Date().toISOString(),
@@ -540,7 +541,7 @@ const Chat = ({ selectedUser , onBack}) => {
     try {
 
       await axios.put(
-        `http://localhost:3006/goals/${goalId}/mark-failed`
+        `${API_URL}/goals/${goalId}/mark-failed`
       );
 
       toast.error("⏰ Goal deadline has passed!");
@@ -652,20 +653,9 @@ const Chat = ({ selectedUser , onBack}) => {
         <h1 className="text-xl font-bold text-white">{selectedUser.name}</h1>
         <MdVideocam
           className="text-white text-2xl cursor-pointer hover:text-green-500"
-          onClick={handleVideoCallClick}
         />
       </div>
 
-      {/* video call */}
-      {showVideoCall && (
-        <VideoCall
-          socket={socket}
-          currentUser={currentUser}
-          remoteUser={selectedUser}
-          onClose={() => setShowVideoCall(false)}
-          isCaller={true}
-        />
-      )}
 
       {/* Chat Messages */}
       <div className="chat-box flex-1 p-4 overflow-y-auto space-y-4">

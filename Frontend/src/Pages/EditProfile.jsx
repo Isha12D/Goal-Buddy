@@ -3,6 +3,8 @@ import { useAuth } from '../Context/AuthContext';
 import axios from 'axios';
 import { FiCamera, FiTrash2} from 'react-icons/fi';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const EditProfile = ({ userFromState, onClose }) => {
     const { currentUser, logout } = useAuth();
     const [formData, setFormData] = useState({ name: "", email: "", password: "" });
@@ -17,7 +19,7 @@ const EditProfile = ({ userFromState, onClose }) => {
 
         try {
         const res = await axios.delete(
-            `http://localhost:3006/user/delete/${currentUser._id}`,
+            `${API_URL}/user/delete/${currentUser._id}`,
             {
             headers: {
                 Authorization: `Bearer ${currentUser.accessToken}`,
@@ -58,7 +60,7 @@ const EditProfile = ({ userFromState, onClose }) => {
             data.append('email', formData.email);
             data.append('password', formData.password);
             if(profilePicFile) data.append('profilePic', profilePicFile);
-            const res = await axios.put('http://localhost:3006/user/update', data, {
+            const res = await axios.put(`${API_URL}/user/update`, data, {
                 headers: {
                     Authorization: `Bearer ${currentUser.accessToken}`,
                     'Content-Type': 'multipart/form-data', ///-> changed due to multer and cloudinary thing

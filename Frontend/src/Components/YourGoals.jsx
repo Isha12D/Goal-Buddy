@@ -4,6 +4,8 @@ import { useAuth } from "../Context/AuthContext";
 import Navbar from "./Navbar.jsx";
 import Footer from "./Footer.jsx";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const YourGoals = () => {
   const { currentUser } = useAuth();
   const [goals, setGoals] = useState([]);
@@ -17,7 +19,7 @@ const YourGoals = () => {
   const fetchGoals = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:3006/goals/personal/${currentUser._id}`,
+        `${API_URL}/goals/personal/${currentUser._id}`,
         { headers: { "Content-Type": "application/json" } }
       );
 
@@ -69,7 +71,7 @@ const YourGoals = () => {
       const completionTime = new Date().toISOString(); // Get the current timestamp
   
       const response = await axios.put(
-        `http://localhost:3006/goals/mark-goal-complete/${goal._id}`, 
+        `${API_URL}/goals/mark-goal-complete/${goal._id}`, 
         { completionTimestamp: completionTime }, // Send timestamp
         { headers: { "Content-Type": "application/json" } }
       );

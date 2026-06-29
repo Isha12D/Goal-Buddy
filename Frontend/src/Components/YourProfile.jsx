@@ -18,7 +18,7 @@ import { Tooltip as ReactTooltip } from "react-tooltip";
 import {FiEdit2} from 'react-icons/fi';
 import EditProfile from "../Pages/EditProfile";
 
-
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Register chart elements
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
@@ -47,7 +47,7 @@ const YourProfile = () => {
 
   const fetchTopGoals = async () => {
     try {
-      const response = await axios.get(`http://localhost:3006/analytics/top-completed-goals/${currentUser?._id}`);
+      const response = await axios.get(`${API_URL}/analytics/top-completed-goals/${currentUser?._id}`);
       setTopGoals(response.data);
     } catch (error) {
       console.error("Error fetching top completed goals:", error);
@@ -56,7 +56,7 @@ const YourProfile = () => {
 
   const fetchTopIncompleteGoals = async () => {
     try {
-      const response = await axios.get(`http://localhost:3006/analytics/top-incomplete-goals/${currentUser?._id}`);
+      const response = await axios.get(`${API_URL}/analytics/top-incomplete-goals/${currentUser?._id}`);
       setTopIncompleteGoals(response.data);
     } catch (error) {
       console.error("Error fetching top incomplete goals:", error);
@@ -66,7 +66,7 @@ const YourProfile = () => {
 
   const fetchGoals = async () => {
     try {
-      const res = await axios.get(`http://localhost:3006/goals/personal/${currentUser?._id}`, {
+      const res = await axios.get(`${API_URL}/goals/personal/${currentUser?._id}`, {
         headers: { "Content-Type": "application/json" },
       });
       setGoals(res.data || []);

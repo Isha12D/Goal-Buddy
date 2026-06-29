@@ -5,6 +5,8 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const goalsData = [
     { id: 1, name: "Master a Language", image: "https://i.pinimg.com/736x/c7/15/4b/c7154b20aa547387ea43913c4adcadc9.jpg" },
     { id: 2, name: "Algorithm", image: "https://i.pinimg.com/736x/3c/fb/3d/3cfb3d6154b75cc328c1fd6d1448803b.jpg" },
@@ -212,7 +214,7 @@ const Goals = ({socket, currentUser, selectedUser, goalType}) => {
         sentTimestamp: goalMessage.timestamp,
       };
 
-      const response = await axios.post('http://localhost:3006/goals', goalData, {
+      const response = await axios.post(`${API_URL}/goals`, goalData, {
         headers: { 'Content-Type': 'application/json' },
       });
       if(response.status === 201){

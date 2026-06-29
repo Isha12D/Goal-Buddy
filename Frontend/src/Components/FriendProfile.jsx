@@ -12,6 +12,8 @@ import {
   Legend,
 } from 'chart.js';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -60,7 +62,7 @@ const FriendProfile = () => {
   // }, [currentUser._id]);
 
   useEffect(() => {
-  axios.get('http://localhost:3006/analytics/top-winners')
+  axios.get(`${API_URL}/analytics/top-winners`)
     .then((res) => {
       console.log("TOP WINNERS:", res.data);
 
@@ -89,11 +91,11 @@ const FriendProfile = () => {
       console.error("Error fetching top winners:", err);
     });
 
-  axios.get(`http://localhost:3006/analytics/rank/${currentUser._id}`)
+  axios.get(`${API_URL}/analytics/rank/${currentUser._id}`)
     .then(res => setUserRank(res.data.rank))
     .catch(err => console.error("Error fetching user rank:", err));
 
-  axios.get(`http://localhost:3006/analytics/completed-goals/${currentUser._id}`)
+  axios.get(`${API_URL}/analytics/completed-goals/${currentUser._id}`)
     .then(res => setCompletedGoals(res.data.completedGoals))
     .catch(err => console.error("Error fetching completed goals:", err));
 
