@@ -23,8 +23,12 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(express.json());
+
 app.use(cors({
-  origin: "http://localhost:5174",
+  origin: [
+    "http://localhost:5174",
+    "https://goalbuddy-eight.vercel.app",
+  ],
   credentials: true,
 }));
 
@@ -41,9 +45,13 @@ app.use("/analytics", analyticsRoutes);
 // Socket
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5174",
-    methods: ["GET", "POST"]
-  }
+    origin: [
+      "http://localhost:5174",
+      "https://goalbuddy-eight.vercel.app",
+    ],
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
 });
 app.set("io", io);
 socketHandler(io);
