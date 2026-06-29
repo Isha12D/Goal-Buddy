@@ -3,6 +3,7 @@ import Login from '../Components/Login.jsx';
 import Signup from '../Components/Signup.jsx';
 import Navbar from '../Components/Navbar.jsx';
 import Footer from '../Components/Footer.jsx';
+import { Link } from 'react-router-dom';
 
 const carouselData = [
   {
@@ -59,9 +60,11 @@ const Home = () => {
           <p className="text-lg md:text-xl">
             Your journey to achieving greatness starts here.
           </p>
-          <button className="mt-4 bg-white text-black rounded-full px-4 py-2 hover:bg-gray-200">
+          <Link to="/main">
+            <button className="mt-4 bg-white text-black rounded-full px-4 py-2 hover:bg-gray-200">
               Get Started
             </button>
+          </Link>
         </div>
 
         {/* Right Column */}

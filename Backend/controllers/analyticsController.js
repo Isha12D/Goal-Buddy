@@ -66,16 +66,69 @@ export const getTopIncompleteGoals = async (req, res) => {
 };
 
 
-export const topWinners = async (req, res) => {
-  const winners = await Goal.aggregate([
-    { $match: { status: "completed", goalType: "friends" } },
-    { $group: { _id: "$winner", count: { $sum: 1 } } },
-    { $sort: { count: -1 } },
-    { $limit: 3 }
-  ]);
+// export const topWinners = async (req, res) => {
+//   const winners = await Goal.aggregate([
+//     { $match: { status: "completed", goalType: "friends" } },
+//     { $group: { _id: "$winner", count: { $sum: 1 } } },
+//     { $sort: { count: -1 } },
+//     { $limit: 3 }
+//   ]);
 
-  res.json(winners);
+//   res.json(winners);
+// };
+
+
+export const topWinners = async (req, res) => {
+  try {
+    const winners = await Goal.aggregate([
+      {
+        $match: {
+          status: "completed",
+          goalType: "friends",
+          winner: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: "$winner",
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 3 },
+
+      // ✅ JOIN WITH USERS COLLECTION
+      {
+        $lookup: {
+          from: "goalbuddies", // IMPORTANT: MongoDB collection name (lowercase plural)
+          localField: "_id",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+
+      {
+        $unwind: "$user"
+      },
+
+      // ✅ FINAL SHAPE FOR FRONTEND
+      {
+        $project: {
+          _id: 1,
+          count: 1,
+          name: "$user.name"
+        }
+      }
+    ]);
+
+    res.json(winners);
+
+  } catch (error) {
+    console.error("Error fetching top winners:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
+
 
 export const userRank = async (req, res) => {
   const { userId } = req.params;

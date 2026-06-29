@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import axios from "axios";
 import { FaPaperPlane, FaPaperclip } from "react-icons/fa";
 import { useAuth } from "../Context/AuthContext";
 import { useGoal } from "../Context/GoalContext";
@@ -30,6 +31,8 @@ const Chat = ({ selectedUser , onBack}) => {
   //video call
   const [showVideoCall, setShowVideoCall] = useState(false);
 
+  const selectedUserRef = useRef(null);
+
   const handleVideoCallClick = () => {
     setShowVideoCall(true);
   };
@@ -60,6 +63,182 @@ const Chat = ({ selectedUser , onBack}) => {
     }
   };
 
+  // useEffect(() => {
+  //   // Establish socket connection once
+  //   if (!socket.current) {
+  //     socket.current = io("http://localhost:3006");
+
+  //     // Listen for incoming messages
+  //     socket.current.on("message", (message) => {
+  //       // Only add the message if it's for the current selected user
+  //       if (
+  //         (message.receiverSocketId === currentUser.name &&
+  //           message.user === selectedUser?.name) ||
+  //         (message.user === currentUser.name &&
+  //           message.receiverSocketId === selectedUser?.name)
+  //       ) {
+  //         setMessages((prevMessages) =>
+  //           // prevMessages.some((msg) => msg._id === message._id)
+  //           // ? prevMessages :
+  //           [...prevMessages, message]
+  //         );
+  //       }
+  //       // console.log("message.receiverSocketId: ",message.receiverSocketId);
+  //       // console.log("currentUser.name:", currentUser.name);
+  //       // console.log("message.user:", message.user);
+  //       // console.log("selectedUser?.name", selectedUser?.name);
+  //     });
+
+  //     //listen for goal messages
+  //     // socket.current.on('goalMessage', (goalMessage) => {
+  //     //   if ((goalMessage.receiverSocketId === currentUser.name && goalMessage.user === selectedUser?.name) ||
+  //     //       (goalMessage.user === currentUser.name && goalMessage.receiverSocketId === selectedUser?.name)) {
+  //     //     setMessages((prevMessages) => [
+  //     //       ...prevMessages,
+  //     //       {
+  //     //         ...goalMessage,
+  //     //         displayTime: new Date(goalMessage.timestamp).toLocaleTimeString([], {
+  //     //           hour: '2-digit',
+  //     //           minute: '2-digit',
+  //     //         }),
+  //     //       },
+  //     //     ]);
+  //     //   }
+  //     //   console.log("goalMessage.receiverSocketId: ",goalMessage.receiverSocketId);
+  //     //   console.log("currentUser.name:", currentUser.name);
+  //     //   console.log("goalMessage.user:", goalMessage.user);
+  //     //   console.log("selectedUser?.name", selectedUser?.name);
+  //     // });
+
+  //     //listen for goal messages
+
+  //     socket.current.on("goalMessage", (goalMessage) => {
+  //       setMessages((prevMessages) => [
+  //         ...prevMessages,
+  //         {
+  //           ...goalMessage,
+  //           displayTime: new Date(goalMessage.timestamp).toLocaleTimeString(
+  //             [],
+  //             {
+  //               hour: "2-digit",
+  //               minute: "2-digit",
+  //             }
+  //           ),
+  //           //can or can't
+  //           goal: {
+  //             ...goalMessage.goal,
+  //             scheduledTime: goalMessage.goal.scheduledTime || "Not Scheduled", // Fallback
+  //           },
+  //         },
+  //       ]);
+
+  //       getGoalId(goalMessage.goal.scheduleTime);
+  //     });
+
+  //     // Register the user on the server
+  //     socket.current.emit("register", currentUser.name);
+  //   }
+
+  //   console.log(
+  //     `I am in Chat.jsx: currentUser: ${JSON.stringify(currentUser?.name)}`
+  //   );
+  //   console.log(
+  //     `I am in Chat.jsx: selectedUser: ${JSON.stringify(selectedUser?.name)}`
+  //   );
+  //   // Clear messages when the selectedUser changes
+  //   setMessages([]);
+
+  //   return () => {
+  //     if (socket.current) {
+  //       socket.current.disconnect();
+  //       socket.current = null;
+  //     }
+  //   };
+  // }, [currentUser, selectedUser]);
+
+  // useEffect(() => {
+  //     socket.current = io("http://localhost:3006");
+
+  //     socket.current.emit("register", currentUser.name);
+
+  //     // socket.current.on("message", (message) => {
+  //     //   setMessages((prev) => [...prev, message]);
+  //     // });
+
+  //     socket.current.on("message", (message) => {
+  //       const activeUser = selectedUserRef.current;
+
+  //       if (!activeUser) return;
+
+  //       const isCurrentChat =
+  //         (message.user === currentUser.name &&
+  //           message.receiverSocketId === activeUser.name) ||
+  //         (message.user === activeUser.name &&
+  //           message.receiverSocketId === currentUser.name);
+
+  //       if (isCurrentChat) {
+  //         setMessages((prev) => [...prev, message]);
+  //       }
+  //     });
+
+  //     // socket.current.on("goalMessage", (goalMessage) => {
+  //     //   setMessages((prev) => [
+  //     //     ...prev,
+  //     //     {
+  //     //       ...goalMessage,
+  //     //       displayTime: new Date(goalMessage.timestamp).toLocaleTimeString([], {
+  //     //         hour: "2-digit",
+  //     //         minute: "2-digit",
+  //     //       }),
+  //     //     },
+  //     //   ]);
+  //     // });
+
+  //     socket.current.on("goalMessage", (goalMessage) => {
+  //       const activeUser = selectedUserRef.current;
+
+  //       if (!activeUser) return;
+
+  //       const isCurrentChat =
+  //         (goalMessage.senderName === currentUser.name &&
+  //           goalMessage.receiverName === activeUser.name) ||
+  //         (goalMessage.senderName === activeUser.name &&
+  //           goalMessage.receiverName === currentUser.name);
+
+  //       if (isCurrentChat) {
+  //         setMessages((prev) => [
+  //           ...prev,
+  //           {
+  //             ...goalMessage,
+  //             displayTime: new Date(goalMessage.timestamp).toLocaleTimeString([], {
+  //               hour: "2-digit",
+  //               minute: "2-digit",
+  //             }),
+  //           },
+  //         ]);
+  //       }
+  //     });
+
+  //     return () => {
+  //       socket.current.disconnect();
+  //     };
+  // }, []); // ✅ ONLY ONCE
+
+  // useEffect(() => {
+  //   selectedUserRef.current = selectedUser;
+  // }, [selectedUser]);
+
+
+  // useEffect(() => {
+  //   if (!selectedUser) return;
+
+  //   console.log("Selected User Changed:", selectedUser.name);
+
+  //   setMessages([]);
+  // }, [selectedUser]);
+
+
+  //updated *25/06/2026* still unemployed
   useEffect(() => {
     // Establish socket connection once
     if (!socket.current) {
@@ -108,6 +287,38 @@ const Chat = ({ selectedUser , onBack}) => {
       // });
 
       //listen for goal messages
+
+      socket.current.on("goal-failed", (data) => {
+          setMessages((prevMessages)=> prevMessages.map((msg) => msg.goal?._id === data.goalId ? {
+            ...msg,
+            status: "failed",
+          }
+          : msg
+        )
+      );
+      });
+
+      socket.current.on("goal-completed", (data) => {
+
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) =>
+            msg.goal?._id === data.goalId
+              ? {
+                  ...msg,
+                  status: "completed",
+                  winner: data.winnerId,
+                }
+              : msg
+          )
+        );
+
+        // Don't show the loser toast to the winner
+        if (data.winnerId !== currentUser._id) {
+          toast.error(
+            `⚠️ ${selectedUser.name} completed the goal first. You lost!`
+          );
+        }
+      });
 
       socket.current.on("goalMessage", (goalMessage) => {
         setMessages((prevMessages) => [
@@ -191,33 +402,35 @@ const Chat = ({ selectedUser , onBack}) => {
           );
           const data = await response.json();
 
-          const formattedMessages = data.map((message) => {
-            const user =
-              message.senderId === currentUser._id
-                ? currentUser.name
-                : selectedUser.name;
+          if (!Array.isArray(data)) {
+  console.error("Expected array but got:", data);
+  return;
+}
 
-            // ✅ Console log user1
-            console.log("User1 Name:", user);
+        const formattedMessages = data.map((message) => {
+          const user =
+            message.senderId === currentUser._id
+              ? currentUser.name
+              : selectedUser.name;
 
-            return {
-              ...message,
-              user,
-              status: message.status,
-              winner: message.winner,
-              timestamp: message.sentTimestamp,
+          return {
+            ...message,
+            user,
+            status: message.status,
+            winner: message.winner,
+            timestamp: message.sentTimestamp,
 
-              goal: {
-                name: message.name,
-                startDate: message.startDate,
-                endDate: message.endDate,
-                scheduleTime: message.scheduleTime,
-                goal: message.name,
-                image: message.image,
-                sentTimestamp: message.timestamp,
-              },
-            };
-          });
+            goal: {
+              name: message.goal,
+              startDate: message.startDate,
+              endDate: message.endDate,
+              scheduleTime: message.scheduleTime,
+              goal: message.goal,
+              image: message.image,
+              sentTimestamp: message.sentTimestamp,
+            },
+          };
+        });
 
           setMessages((prevMessages) => [
             ...formattedMessages,
@@ -255,71 +468,151 @@ const Chat = ({ selectedUser , onBack}) => {
     }
   };
 
-  // Function to mark the goal as complete
+  const formatTime = (timeString) => {
+    const [hours, minutes] = timeString.split(":");
+
+    return new Date(
+      2025, 
+      0,
+      1,
+      Number(hours),
+      Number(minutes)
+    ).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  }
+
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const isDeadlinePassed = (goal) => {
+    const deadline = new Date(goal.endDate);
+    const [hours, minutes] = goal.scheduleTime.split(":").map(Number);
+    deadline.setHours(hours, minutes, 0, 0);
+    return new Date() > deadline;
+  };
+
   const markComplete = async (goalId) => {
     try {
-      // Call the API to mark the goal as complete
       console.log("Ima in mark complete with goal id:", goalId);
 
-      const response = await fetch(
+      const response = await axios.put(
         `http://localhost:3006/goals/${goalId}/mark-complete`,
         {
-          method: "PUT",
-          body: JSON.stringify({ winnerId: currentUser._id }),
-          headers: { "Content-Type": "application/json" },
+          winnerId: currentUser._id,
+          completionTimestamp: new Date().toISOString(),
         }
       );
 
-      // Parse the response as JSON
-      const data = await response.json();
+      const data = response.data;
 
-      // Log the response data if successful
-      if (response.ok) {
-        console.log("Goal marked complete:", data);
+      console.log("Goal marked complete:", data);
 
-        toast.success("🎉 Goal completed successfully!", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-
-        setCompletedGoals((prev) => new Set([...prev, goalId]));
-        socket.current.emit("goal-completed", {
-          goalId,
-          winnerId: currentUser._id,
-          particpants: [currentUser.name, selectedUser.name],
-        });
-      } else {
-        console.log("Failed to mark goal complete:", data.message);
-        toast.error(` You lost! ${selectedUser.name} has already completed this goal.`, {
+      toast.success("🎉 Goal completed successfully!", {
         position: "top-right",
         autoClose: 3000,
       });
-      }
+
+      setCompletedGoals((prev) => new Set([...prev, goalId]));
+
+      // socket.current.emit("goal-completed", {
+      //   goalId,
+      //   winnerId: currentUser._id,
+      //   participants: [currentUser.name, selectedUser.name],
+      // });
+
     } catch (error) {
-      console.error("Error marking goal complete:", error);
-      toast.error("⚠️ Something went wrong. Try again later.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      console.error("AXIOS ERROR:", error);
+      console.error("AXIOS RESPONSE:", error.response);
+
+      toast.error(`⚠️ You lost! ${selectedUser.name} has already completed this goal.`);
     }
   };
 
-  const handleGoalCheckboxChange = async (e, scheduleTime) => {
-    const isChecked = e.target.checked;
-    setIsGoalComplete(isChecked);
-    //console.log('goal id is:', goalId);
-    if (isChecked) {
-      const goalId = await getGoalId(scheduleTime); // Get the goalId from the goalMessage
-      console.log("Ima in Chat.jsx and here is the goal id:", goalId);
-      if (goalId) {
-        // Proceed to mark complete if no winner
-        console.log("✅ Marking goal complete, goalId:", goalId);
-        markComplete(goalId);
-      }
+  const markFailed = async (goalId) => {
+    try {
+
+      await axios.put(
+        `http://localhost:3006/goals/${goalId}/mark-failed`
+      );
+
+      toast.error("⏰ Goal deadline has passed!");
+
+    } catch (error) {
+      console.error(error);
     }
   };
+
+  // const handleGoalCheckboxChange = async (e, scheduleTime, endDate) => {
+  //   const isChecked = e.target.checked;
+  //   const deadline = new Date(endDate);
+
+  //   const [hours, minutes] = scheduleTime.split(":").map(Number);
+
+  //   deadline.setHours(hours, minutes, 0, 0);
+
+  //   if(new Date() > deadline){
+  //     toast.error("⏰ Goal deadline has passed!");
+  //     setIsGoalComplete(false);
+  //     return;
+  //   }
+  //   setIsGoalComplete(isChecked);
+  //   //console.log('goal id is:', goalId);
+  //   if (isChecked) {
+  //     const goalId = await getGoalId(scheduleTime); // Get the goalId from the goalMessage
+  //     console.log("Ima in Chat.jsx and here is the goal id:", goalId);
+  //     if (goalId) {
+  //       // Proceed to mark complete if no winner
+  //       console.log("✅ Marking goal complete, goalId:", goalId);
+  //       markComplete(goalId);
+  //     }
+  //   }
+  // };
 
   //goals component passing
+  
+  const handleGoalCheckboxChange = async (
+      e,
+      scheduleTime,
+      endDate
+    ) => {
+
+      const isChecked = e.target.checked;
+
+      const goalId = await getGoalId(scheduleTime);
+
+      const deadline = new Date(endDate);
+
+      const [hours, minutes] =
+        scheduleTime.split(":").map(Number);
+
+      deadline.setHours(hours, minutes, 0, 0);
+
+      if (new Date() > deadline) {
+
+        if (goalId) {
+          await markFailed(goalId);
+        }
+
+        setIsGoalComplete(false);
+
+        return;
+      }
+
+      setIsGoalComplete(isChecked);
+
+      if (isChecked && goalId) {
+        markComplete(goalId);
+      }
+    };
+      
   const openDialog = () => {
     setIsDialogOpen(true);
   };
@@ -393,7 +686,7 @@ const Chat = ({ selectedUser , onBack}) => {
                 }`}
               >
                 <div>
-                  <span className="font-bold text-sm text-slate-300">
+                  <span className="font-bold text-sm text-orange-700">
                     {msg.user === currentUser.name ? "You" : selectedUser.name}
                   </span>
                 </div>
@@ -445,15 +738,20 @@ const Chat = ({ selectedUser , onBack}) => {
 
                 {/* Goal Start and End Dates */}
                 <p className="text-sm  mt-1">
-                  Start Date: {message.goal.startDate}
+                  Start Date: {formatDate(message.goal.startDate)}
                 </p>
-                <p className="text-sm ">End Date: {message.goal.endDate}</p>
+                <p className="text-sm ">End Date: {formatDate(message.goal.endDate)}</p>
 
                 {/* Time Field (display when the goal was sent) */}
                 <p>
-                  Sent: {new Date(message.goal.timestamp).toLocaleTimeString()}
+                  Sent: {" "}
+                  {new Date(message.goal.sentTimestamp).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute:"2-digit",
+                    hour12: true,
+                  })}
                   {" | "}
-                  Scheduled: {message.goal.scheduleTime}
+                  Scheduled: {formatTime(message.goal.scheduleTime)}
                 </p>
 
                 {/* Winner's Checkbox */}
@@ -463,19 +761,20 @@ const Chat = ({ selectedUser , onBack}) => {
                   <div className="text-sm text-green-500">
                     ✅ Completed by {message.winner?.name || "Unknown"}
                   </div>
-                ) : message.status === "incomplete" ? (
+                ) : isDeadlinePassed(message.goal) ? (
                   <div className="text-sm text-red-500">
-                    ❌ Incomplete (end date passed)
+                    ❌ Failed (deadline passed)
                   </div>
                 ) : (
                   <div className="inline-flex items-center space-x-2">
                     <input
                       type="checkbox"
+                      disabled={isDeadlinePassed(message.goal)}
                       id={`goal-complete-${index}`}
                       className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                       checked={isGoalComplete}
                       onChange={(e) =>
-                        handleGoalCheckboxChange(e, message.goal.scheduleTime)
+                        handleGoalCheckboxChange(e, message.goal.scheduleTime, message.goal.endDate)
                       }
                     />
                     <label
@@ -536,6 +835,9 @@ const Chat = ({ selectedUser , onBack}) => {
           onClose={closeDialog}
           fullWidth
           maxWidth="md"
+          disableRestoreFocus
+          disableAutoFocus
+          disableEnforceFocus
         >
           <DialogTitle>Set your Goal</DialogTitle>
           <DialogContent>

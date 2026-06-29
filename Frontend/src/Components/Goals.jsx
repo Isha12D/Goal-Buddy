@@ -41,6 +41,7 @@ const Goals = ({socket, currentUser, selectedUser, goalType}) => {
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const today = new Date().toISOString().split("T")[0]; //new Date()
+  const [errorMessage, setErrorMessage] = useState("");
 
 // Creates a new Date object with the current date and time.
 
@@ -91,6 +92,74 @@ const Goals = ({socket, currentUser, selectedUser, goalType}) => {
   //const scheduledTimeISO = new Date(${today}T${goalData.scheduleTime}:00Z).toISOString();
 
   const handleSubmit = () => {
+
+      setErrorMessage("");
+
+    // Goal selected
+    if (!selectedGoal) {
+      setErrorMessage("Please select a goal");
+      return;
+    }
+
+    // Description
+    if (!goalData.description?.trim()) {
+      setErrorMessage("Description is required");
+      return;
+    }
+
+    // Start Date
+    if (!goalData.startDate) {
+      setErrorMessage("Start date is required");
+      return;
+    }
+
+    // End Date
+    if (!goalData.endDate) {
+      setErrorMessage("End date is required");
+      return;
+    }
+
+    // Schedule Time
+    if (!goalData.scheduleTime) {
+      setErrorMessage("Schedule time is required");
+      return;
+    }
+
+    // End date >= Start date
+    if (
+      new Date(goalData.endDate) <
+      new Date(goalData.startDate)
+    ) {
+      setErrorMessage("End date cannot be before start date");
+      return;
+    }
+
+    // If start date is today, time should not be in past
+    const todayDate = new Date().toISOString().split("T")[0];
+
+    if (goalData.startDate === todayDate) {
+      const now = new Date();
+
+      const [hours, minutes] =
+        goalData.scheduleTime.split(":");
+
+      const selectedTime = new Date();
+
+      selectedTime.setHours(
+        Number(hours),
+        Number(minutes),
+        0,
+        0
+      );
+
+      if (selectedTime < now) {
+        setErrorMessage(
+          "Schedule time cannot be in the past"
+        );
+        return;
+      }
+    }
+
     //console.log("Goal set:", goalData);
     setGoalData(goalData);
     const goalMessage = {
@@ -205,6 +274,7 @@ const Goals = ({socket, currentUser, selectedUser, goalType}) => {
               <TextField
                 fullWidth
                 label="Add Description"
+                required
                 variant="outlined"
                 name="description"
                 value={goalData.description || ""}
@@ -223,6 +293,7 @@ const Goals = ({socket, currentUser, selectedUser, goalType}) => {
               <TextField
                 fullWidth
                 label="Start Date"
+                required
                 variant="outlined"
                 type="date"
                 name="startDate"
@@ -246,6 +317,7 @@ const Goals = ({socket, currentUser, selectedUser, goalType}) => {
               <TextField
                 fullWidth
                 label="End Date"
+                required
                 variant="outlined"
                 type="date"
                 name="endDate"
@@ -269,6 +341,7 @@ const Goals = ({socket, currentUser, selectedUser, goalType}) => {
               <TextField
                 fullWidth
                 label="Schedule Time"
+                required
                 variant="outlined"
                 type="time"
                 name="scheduleTime"
@@ -281,6 +354,15 @@ const Goals = ({socket, currentUser, selectedUser, goalType}) => {
               />
             </div>
           </DialogContent>
+          {errorMessage && (
+            <Typography
+              color="error"
+              align="center"
+              sx={{ mb: 2 }}
+            >
+              {errorMessage}
+            </Typography>
+          )}
           <DialogActions>
             <Button onClick={handleDialogClose} color="secondary">
               Cancel

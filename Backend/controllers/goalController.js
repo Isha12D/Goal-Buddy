@@ -1,5 +1,5 @@
 import Goal from "../models/goals.js";
-
+import GoalBuddy from "../models/users.js";
 
 // ➕ Create goal (personal or friends)
 export const createGoal = async (req, res) => {
@@ -69,7 +69,12 @@ export const getPersonalGoals = async (req, res) => {
     const updatedGoals = await Promise.all(
       goals.map(async (goal) => {
 
-        if (goal.status === "completed") return goal;
+        if (
+            goal.status === "completed" ||
+            goal.completionTimestamp
+        ) {
+            return goal;
+        }
 
         let endDate = new Date(goal.endDate);
 
@@ -106,65 +111,226 @@ export const markPersonalGoalComplete = async (req, res) => {
     const { goalId } = req.params;
     const { completionTimestamp } = req.body;
 
-    const updatedGoal = await Goal.findByIdAndUpdate(
-      goalId,
-      {
-        status: "completed",
-        completionTimestamp
-      },
-      { new: true }
-    );
+    const goal = await Goal.findById(goalId);
 
-    if (!updatedGoal) {
-      return res.status(404).json({ message: "Goal not found" });
+    if (!goal) {
+      return res.status(404).json({
+        message: "Goal not found",
+      });
     }
 
-    res.json(updatedGoal);
+    // Already completed or expired
+    if (goal.status !== "pending") {
+      return res.status(400).json({
+        message: "Goal already completed or expired",
+      });
+    }
+
+    // Build deadline
+    const deadline = new Date(goal.endDate);
+
+    const [hours, minutes] = goal.scheduleTime
+      .split(":")
+      .map(Number);
+
+    deadline.setHours(hours, minutes, 0, 0);
+
+    // Deadline crossed
+    if (new Date() > deadline) {
+      goal.status = "incomplete";
+      await goal.save();
+
+      return res.status(400).json({
+        message: "Deadline passed",
+      });
+    }
+
+    goal.status = "completed";
+    goal.completionTimestamp = completionTimestamp;
+
+    await goal.save();
+
+    res.json(goal);
 
   } catch (error) {
-    console.error("Error marking personal goal complete:", error);
-    res.status(500).json({ message: "Failed to update goal" });
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to update goal",
+    });
   }
 };
 
 
 
-
 // 📥 Fetch shared/friends goals
+// export const getSharedGoals = async (req, res) => {
+//   try {
+//     const goals = await Goal.find({ goalType: "friends" })
+//       .populate("senderId receiverId winner");
+
+//     res.json(goals);
+
+//   } catch (error) {
+//     res.status(500).json({ message: "Failed to fetch shared goals" });
+//   }
+// };
+
 export const getSharedGoals = async (req, res) => {
   try {
-    const goals = await Goal.find({ goalType: "friends" })
-      .populate("senderId receiverId winner");
+    const { senderEmail, receiverEmail } = req.params;
+
+    const sender = await GoalBuddy.findOne({ email: senderEmail });
+    const receiver = await GoalBuddy.findOne({ email: receiverEmail });
+
+    if (!sender || !receiver) {
+      return res.status(404).json({ message: "Users not found" });
+    }
+
+    const goals = await Goal.find({
+      goalType: "friends",
+      $or: [
+        {
+          senderId: sender._id,
+          receiverId: receiver._id,
+        },
+        {
+          senderId: receiver._id,
+          receiverId: sender._id,
+        },
+      ],
+    }).populate("winner", "name")
+    .sort({ createdAt: 1 });
+
+    const now = new Date();
+
+    for(const goal of goals){
+      if (
+          goal.status === "completed" ||
+          goal.status === "failed" ||
+          goal.winner ||
+          goal.completionTimestamp
+      ) {
+          continue;
+      }
+      const deadline = new Date(goal.endDate);
+
+      const [hours, minutes] = goal.scheduleTime.split(":").map(Number);
+      deadline.setHours(hours, minutes, 0, 0);
+      if(now > deadline){
+        goal.status = 'failed';
+        await goal.save();
+      }
+    }
 
     res.json(goals);
-
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch shared goals" });
-  }
+  console.error("🔥 FULL BACKEND ERROR:", error);
+
+  res.status(500).json({
+    message: "Failed to fetch shared goals",
+    error: error.message,
+  });
+}
 };
 
 
 
 // ✅ Mark goal complete
 export const markComplete = async (req, res) => {
-  try {
-    const { goalId } = req.params;
-    const { winnerId } = req.body;
+  const io = req.app.get("io");
 
-    const goal = await Goal.findOneAndUpdate(
-      { _id: goalId, winner: null },
-      { winner: winnerId, status: "completed" },
+  const { goalId } = req.params;
+  const { winnerId } = req.body;
+
+  try {
+    console.log("REQ BODY:", req.body);
+
+    // Only update goals that are still pending
+    const updatedGoal = await Goal.findOneAndUpdate(
+      {
+        _id: goalId,
+        goalType: "friends",
+        status: "pending",      // 👈 important
+        winner: null,           // 👈 safety check
+      },
+      {
+        $set: {
+          winner: winnerId,
+          status: "completed",
+          completionTimestamp: new Date(),
+        },
+      },
       { new: true }
     );
 
-    if (!goal) {
-      return res.status(400).json({ message: "Already completed" });
+    if (!updatedGoal) {
+      return res.status(400).json({
+        message: "Goal is already completed or failed.",
+      });
     }
+
+    io.emit("goal-completed", {
+      goalId: updatedGoal._id,
+      winnerId,
+      status: "completed",
+    });
+
+    res.json({
+      message: "Goal marked as complete",
+      goal: updatedGoal,
+    });
+
+  } catch (error) {
+    console.error("Error marking goal complete:", error);
+    res.status(500).json({
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+};
+
+//Mark goal as failed
+export const markFailed = async (req, res) => {
+  try {
+
+    const io = req.app.get("io");
+    const { goalId } = req.params;
+
+    const goal = await Goal.findById(goalId);
+
+    if (!goal) {
+      return res.status(404).json({
+        message: "Goal not found",
+      });
+    }
+
+    // ✅ Already completed?
+    if (
+      goal.status === "completed" ||
+      goal.winner ||
+      goal.completionTimestamp
+    ) {
+      return res.status(400).json({
+        message: "Goal already completed",
+      });
+    }
+
+    goal.status = "failed";
+    await goal.save();
+
+    io.emit("goal-failed", {
+      goalId,
+      status: "failed",
+    });
 
     res.json(goal);
 
   } catch (error) {
-    res.status(500).json({ message: "Failed to update goal" });
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed",
+    });
   }
 };
 
@@ -201,3 +367,23 @@ export const getGoalId = async (req, res) => {
   }
 };
 
+
+
+// Find Goal
+//    ↓
+// Build Deadline
+//    ↓
+// Deadline Passed?
+//    ↓
+// YES --------------------> status = failed
+//                             save
+//                             io.emit("goal-failed")
+//                             return
+
+// NO
+//    ↓
+// Update Winner
+//    ↓
+// io.emit("goal-completed")
+//    ↓
+// res.json(...)

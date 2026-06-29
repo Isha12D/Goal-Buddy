@@ -45,25 +45,48 @@ const YourGoals = () => {
     }
   };
 
+  const isDeadlinePassed = (goal) => {
+    const deadline = new Date(goal.endDate);
 
-  const markAsComplete = async (goalId) => {
+    const [hours, minutes] = goal.scheduleTime
+      .split(":")
+      .map(Number);
+
+    deadline.setHours(hours, minutes, 0, 0);
+
+    return new Date() > deadline;
+  };
+
+  const markAsComplete = async (goal) => {
     try {
+      
+      if (isDeadlinePassed(goal)) {
+          alert("⏰ Deadline has passed!");
+          await fetchGoals(); // refreshes status from backend
+          return;
+      }
+      
       const completionTime = new Date().toISOString(); // Get the current timestamp
   
       const response = await axios.put(
-        `http://localhost:3006/goals/mark-goal-complete/${goalId}`, 
+        `http://localhost:3006/goals/mark-goal-complete/${goal._id}`, 
         { completionTimestamp: completionTime }, // Send timestamp
         { headers: { "Content-Type": "application/json" } }
       );
   
       const updatedGoal = response.data;
   
-      setGoals(goals.map((goal) => 
-        goal._id === goalId 
-          ? { ...goal, status: "completed", completionTimestamp: updatedGoal.completionTimestamp }
-          : goal
-      ));
-      
+      setGoals((prevGoals) =>
+        prevGoals.map((g) =>
+          g._id === goal._id
+            ? {
+                ...g,
+                status: "completed",
+                completionTimestamp: updatedGoal.completionTimestamp,
+              }
+            : g
+        )
+      );
     } catch (error) {
       console.error("Error marking goal as complete:", error);
     }
@@ -80,7 +103,15 @@ const YourGoals = () => {
       hour12: true,
     });
   };
-  
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setGoals((prev) => [...prev]);
+    }, 60000); // every minute
+
+    return () => clearInterval(timer);
+  }, []);
+    
 
   return (
     <div>
@@ -112,11 +143,11 @@ const YourGoals = () => {
             </p>
 
             {/* Show checkbox only for pending goals within the deadline */}
-            {(goal.status === "pending") && (
+            {goal.status === "pending" && (
               <div className="mt-3">
                 <input
                   type="checkbox"
-                  onChange={() => markAsComplete(goal._id)}
+                  onChange={() => markAsComplete(goal)}
                   className="mr-2"
                 />
                 <label>Mark as Completed</label>

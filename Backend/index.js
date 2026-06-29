@@ -1,3 +1,6 @@
+import dns from 'node:dns';
+dns.setServers(['1.1.1.1', '1.0.0.1']);
+
 import express from "express";
 import cors from "cors";
 import http from "http";
@@ -42,7 +45,7 @@ const io = new Server(server, {
     methods: ["GET", "POST"]
   }
 });
-
+app.set("io", io);
 socketHandler(io);
 
 // Server

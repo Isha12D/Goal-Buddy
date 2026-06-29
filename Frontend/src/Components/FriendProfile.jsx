@@ -21,48 +21,88 @@ const FriendProfile = () => {
   const [completedGoals, setCompletedGoals] = useState(null);
   const {currentUser} = useAuth();
 
-  useEffect(() => {
-    axios.get('http://localhost:3006/analytics/top-winners')
-      .then((res) => {
-        const names = res.data.map(item => item.name);
-        const goals = res.data.map(item => item.completedGoals);
+  // useEffect(() => {
+  //   axios.get('http://localhost:3006/analytics/top-winners')
+  //     .then((res) => {
+  //       const names = res.data.map(item => item.name);
+  //       const goals = res.data.map(item => item.completedGoals);
 
-        setChartData({
-          labels: names,
-          datasets: [
-            {
-              label: 'Completed Goals',
-              data: goals,
-              backgroundColor: function(context) {
-                const gradient = context.chart.ctx.createLinearGradient(0, 100, 0, 400);
-                gradient.addColorStop(0, '#a78bfa'); // light purple
-                gradient.addColorStop(1, '#7e5bef'); // darker purple
-                return gradient;
-              },
-              borderRadius: 6,
-              hoverBackgroundColor: '#a78bfa', // prevent grey hover
+  //       setChartData({
+  //         labels: names,
+  //         datasets: [
+  //           {
+  //             label: 'Completed Goals',
+  //             data: goals,
+  //             backgroundColor: function(context) {
+  //               const gradient = context.chart.ctx.createLinearGradient(0, 100, 0, 400);
+  //               gradient.addColorStop(0, '#a78bfa'); // light purple
+  //               gradient.addColorStop(1, '#7e5bef'); // darker purple
+  //               return gradient;
+  //             },
+  //             borderRadius: 6,
+  //             hoverBackgroundColor: '#a78bfa', // prevent grey hover
+  //           },
+  //         ],
+  //       });
+  //     })
+  //     .catch((err) => {
+  //       console.error("Error fetching top winners:", err);
+  //     });
+  //     //fetch user rank
+  //     axios.get(`http://localhost:3006/analytics/rank/${currentUser._id}`)
+  //     .then(res => setUserRank(res.data.rank))
+  //     .catch(err => console.error("Error fetching user rank:", err));
+  //     //fetch total no. of completed goals 
+  //     // Fetch user's completed goals 
+  //   axios.get(`http://localhost:3006/analytics/completed-goals/${currentUser._id}`)
+  //     .then(res => setCompletedGoals(res.data.completedGoals))
+  //     .catch(err => console.error("Error fetching completed goals:", err));
+  // }, [currentUser._id]);
+
+  useEffect(() => {
+  axios.get('http://localhost:3006/analytics/top-winners')
+    .then((res) => {
+      console.log("TOP WINNERS:", res.data);
+
+      const names = res.data.map(item => item.name);
+      const goals = res.data.map(item => item.count); // ✅ FIXED
+
+      setChartData({
+        labels: names,
+        datasets: [
+          {
+            label: 'Completed Goals',
+            data: goals, // ✅ now correct
+            backgroundColor: function(context) {
+              const gradient = context.chart.ctx.createLinearGradient(0, 100, 0, 400);
+              gradient.addColorStop(0, '#a78bfa');
+              gradient.addColorStop(1, '#7e5bef');
+              return gradient;
             },
-          ],
-        });
-      })
-      .catch((err) => {
-        console.error("Error fetching top winners:", err);
+            borderRadius: 6,
+            hoverBackgroundColor: '#a78bfa',
+          },
+        ],
       });
-      //fetch user rank
-      axios.get(`http://localhost:3006/analytics/rank/${currentUser._id}`)
-      .then(res => setUserRank(res.data.rank))
-      .catch(err => console.error("Error fetching user rank:", err));
-      //fetch total no. of completed goals 
-      // Fetch user's completed goals 
-    axios.get(`http://localhost:3006/analytics/completed-goals/${currentUser._id}`)
-      .then(res => setCompletedGoals(res.data.completedGoals))
-      .catch(err => console.error("Error fetching completed goals:", err));
-  }, [currentUser._id]);
+    })
+    .catch((err) => {
+      console.error("Error fetching top winners:", err);
+    });
+
+  axios.get(`http://localhost:3006/analytics/rank/${currentUser._id}`)
+    .then(res => setUserRank(res.data.rank))
+    .catch(err => console.error("Error fetching user rank:", err));
+
+  axios.get(`http://localhost:3006/analytics/completed-goals/${currentUser._id}`)
+    .then(res => setCompletedGoals(res.data.completedGoals))
+    .catch(err => console.error("Error fetching completed goals:", err));
+
+}, [currentUser._id]);
 
   return (
     <div className="w-full max-w-md mx-auto mt-8">
       <h2 className="text-xl font-bold text-center mb-4">🏆 Top 3 Goal Winners</h2>
-      {chartData ? (
+      {chartData?.labels?.length > 0 ? (
         <Bar
           data={chartData}
           options={{

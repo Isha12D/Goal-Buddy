@@ -41,6 +41,8 @@ Currently, two official plugins are available:
 # ###########   FUTURE SCOPE   ##############
 # 1. To add badges like 'achiever', 'consistent queen' etc.
 
+# 2. can use 'cron-jobs' for goals status update like it checks in every small interval...
+
 
 
 

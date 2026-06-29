@@ -17,21 +17,46 @@ const Signup = ({toggleSignupForm}) => {
   };
 
   const handleSubmit = (e) => {
-      e.preventDefault();
-      setErrorMessage('');
+    e.preventDefault();
+    setErrorMessage('');
 
-      if (!validateEmail(email)) {
-        setErrorMessage('Invalid email format');
-        return;
-      }
+    // Name validation
+    if (!name.trim()) {
+      setErrorMessage('Name is required');
+      return;
+    }
 
-      axios.post('http://localhost:3006/auth/signup',{name, email, password})
-      .then(result => {console.log(result);
-        signup(result.data);
-        navigate('/main')
-      })
-      .catch(err => setErrorMessage('Signup failed. Try again.'))
-  }
+    // Email validation
+    if (!email.trim()) {
+      setErrorMessage('Email is required');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setErrorMessage('Invalid email format');
+      return;
+    }
+
+    // Password validation
+    if (!password.trim()) {
+      setErrorMessage('Password is required');
+      return;
+    }
+
+    axios.post('http://localhost:3006/auth/signup', {
+      name,
+      email,
+      password
+    })
+    .then(result => {
+      console.log(result);
+      signup(result.data);
+      navigate('/main');
+    })
+    .catch(err => {
+      setErrorMessage('Signup failed. Try again.');
+    });
+  };
 
 
   return (
