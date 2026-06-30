@@ -16,19 +16,67 @@ const YourGoals = () => {
     }
   }, [currentUser]);
 
+  const markPersonalGoalIncomplete = async (goalId) => {
+    try {
+      await axios.put(
+      `${API_URL}/goals/mark-goal-incomplete/${goalId}`,
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    } catch (error) {
+      console.error("Error marking goal incomplete:", error);
+    }
+  };
+
   const fetchGoals = async () => {
     try {
-      const res = await axios.get(
+      let res = await axios.get(
         `${API_URL}/goals/personal/${currentUser._id}`,
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
+      let fetchedGoals = [...res.data];
+      let updated = false;
+
+      // Check if any pending goal has crossed its deadline
+      for (const goal of fetchedGoals) {
+        if (goal.status === "pending" && isDeadlinePassed(goal)) {
+          await markPersonalGoalIncomplete(goal._id);
+          updated = true;
+        }
+      }
+
+      // If any goal was updated to incomplete, fetch fresh data
+      if (updated) {
+        res = await axios.get(
+          `${API_URL}/goals/personal/${currentUser._id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        fetchedGoals = [...res.data];
+      }
+
       // Merge date + time and create sortable timestamp
-      const updatedGoals = res.data.map((goal) => {
+      const updatedGoals = fetchedGoals.map((goal) => {
         const date = new Date(goal.endDate);
 
         if (goal.scheduleTime) {
-          const [hours, minutes] = goal.scheduleTime.split(":").map(Number);
+          const [hours, minutes] = goal.scheduleTime
+            .split(":")
+            .map(Number);
+
           date.setHours(hours, minutes, 0, 0);
         }
 
@@ -38,10 +86,11 @@ const YourGoals = () => {
         };
       });
 
-      //  MOST RECENT FIRST
+      // MOST RECENT FIRST
       updatedGoals.sort((a, b) => b.fullDateTime - a.fullDateTime);
 
       setGoals(updatedGoals);
+
     } catch (error) {
       console.error("Error fetching goals:", error);
     }
@@ -64,11 +113,13 @@ const YourGoals = () => {
       
       if (isDeadlinePassed(goal)) {
           alert("⏰ Deadline has passed!");
+          await markPersonalGoalIncomplete(goal._id);
           await fetchGoals(); // refreshes status from backend
           return;
       }
       
       const completionTime = new Date().toISOString(); // Get the current timestamp
+
   
       const response = await axios.put(
         `${API_URL}/goals/mark-goal-complete/${goal._id}`, 
@@ -107,12 +158,14 @@ const YourGoals = () => {
   };
 
   useEffect(() => {
+    if (!currentUser?._id) return;
+
     const timer = setInterval(() => {
-      setGoals((prev) => [...prev]);
-    }, 60000); // every minute
+      fetchGoals();
+    }, 60000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [currentUser]);
     
 
   return (
@@ -145,7 +198,7 @@ const YourGoals = () => {
             </p>
 
             {/* Show checkbox only for pending goals within the deadline */}
-            {goal.status === "pending" && (
+            {goal.status === "pending" && !isDeadlinePassed(goal) && (
               <div className="mt-3">
                 <input
                   type="checkbox"

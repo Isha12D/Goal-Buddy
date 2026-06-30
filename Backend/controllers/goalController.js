@@ -63,40 +63,9 @@ export const getPersonalGoals = async (req, res) => {
       goalType: "personal",
     });
 
-    const now = new Date();
+    goals.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
 
-    // Update expired goals to incomplete
-    const updatedGoals = await Promise.all(
-      goals.map(async (goal) => {
-
-        if (
-            goal.status === "completed" ||
-            goal.completionTimestamp
-        ) {
-            return goal;
-        }
-
-        let endDate = new Date(goal.endDate);
-
-        if (goal.scheduleTime) {
-          const [hours, minutes] = goal.scheduleTime.split(":").map(Number);
-          endDate.setHours(hours, minutes, 0);
-        }
-
-        // If deadline passed → mark incomplete in DB
-        if (endDate < now && goal.status !== "incomplete") {
-          goal.status = "incomplete";
-          await goal.save();
-        }
-
-        return goal;
-      })
-    );
-
-    // Sort newest first
-    updatedGoals.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
-
-    res.json(updatedGoals);
+    res.json(goals);
 
   } catch (error) {
     console.error("Failed to fetch personal goals:", error);
@@ -154,6 +123,53 @@ export const markPersonalGoalComplete = async (req, res) => {
 
   } catch (error) {
     console.error(error);
+    res.status(500).json({
+      message: "Failed to update goal",
+    });
+  }
+};
+
+// ✅ Mark PERSONAL goal as incomplete (deadline passed)
+export const markPersonalGoalFailed = async (req, res) => {
+  try {
+    const { goalId } = req.params;
+
+    const goal = await Goal.findById(goalId);
+
+    if (!goal) {
+      return res.status(404).json({
+        message: "Goal not found",
+      });
+    }
+
+    // Already completed or already incomplete
+    if (
+      goal.status === "completed" ||
+      goal.status === "incomplete"
+    ) {
+      return res.json(goal);
+    }
+
+    // Build deadline
+    const deadline = new Date(goal.endDate);
+
+    const [hours, minutes] = goal.scheduleTime
+      .split(":")
+      .map(Number);
+
+    deadline.setHours(hours, minutes, 0, 0);
+
+    // Only mark incomplete if deadline passed
+    if (new Date() > deadline) {
+      goal.status = "incomplete";
+      await goal.save();
+    }
+
+    res.json(goal);
+
+  } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       message: "Failed to update goal",
     });

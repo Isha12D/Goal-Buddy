@@ -40,8 +40,8 @@ const Main = () => {
         }
       }
     }
-    fetchProtectedData();
-  }, []);
+    //fetchProtectedData();
+  });
 
   const refreshAccessToken = async() => {
     const refreshToken = localStorage.getItem('refreshToken');
