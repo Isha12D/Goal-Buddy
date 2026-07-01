@@ -27,7 +27,7 @@ app.use(express.json());
 app.use(cors({
   origin: [
     "http://localhost:5174",
-    "https://goal-buddy-liard.vercel.app/",
+    "https://goal-buddy-liard.vercel.app",
   ],
   credentials: true,
 }));
@@ -47,7 +47,7 @@ const io = new Server(server, {
   cors: {
     origin: [
       "http://localhost:5174",
-      "https://goal-buddy-liard.vercel.app/",
+      "https://goal-buddy-liard.vercel.app",
     ],
     methods: ["GET", "POST"],
     credentials: true,
