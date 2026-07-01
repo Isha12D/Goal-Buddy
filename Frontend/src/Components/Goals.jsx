@@ -1,4 +1,4 @@
-;import React, { useState } from "react"; 
+import React, { useState } from "react"; 
 import { useGoal } from "../Context/GoalContext";
 import { Card, CardContent, Typography, Grid, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, InputAdornment } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
